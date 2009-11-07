@@ -1,56 +1,43 @@
-/*
- * Copyright 2009 FriendFeed
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain
- * a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
+/* @override http://looce.com:8888/static/chat.css?v=8bfd9*/
 
 body {
-  background: white;
-  margin: 10px;
+	background: white;
+  	margin: 10px;
+  	font-family: sans-serif;
+  	font-size: 10pt;
+  	color: black;
 }
 
-body,
-input {
-  font-family: sans-serif;
-  font-size: 10pt;
-  color: black;
+#editor {
+	width: 75%;
+	float: left;
 }
 
-table {
-  border-collapse: collapse;
-  border: 0;
+#chat {
+	width: 25%;
+	float: left;
+	position: absolute;
+	right: 10px;
+	bottom: 0;
 }
 
-td {
-  border: 0;
-  padding: 0;
+#footer {
+	clear: both;
+}
+input#message {
+	width: 100% !important;
 }
 
-#body {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
+textarea {
+	padding: 10px;
+	width: 90%;
+	height: 500px;
 }
 
-#input {
-  margin-top: 0.5em;
+#messageform {
+	width: 100%;
 }
 
-#inbox .message {
-  padding-top: 0.25em;
-}
-
-#nav {
-  float: right;
-  z-index: 99;
+#inbox {
+	overflow: auto;
 }
