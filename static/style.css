@@ -1,0 +1,79 @@
+/* @override http://dev.looce.com:8888/static/style.css?v=998e0 */
+
+/* @override http://looce.com:8888/static/chat.css?v=8bfd9*/
+
+body {
+	background: white;
+  	margin:0;
+  	font-family: sans-serif;
+  	font-size: 10pt;
+  	color: black;
+}
+
+#header {
+	background: #000;
+	width: 100%;
+	padding-top: 10px;
+	height: 40px;
+}
+
+#header a {
+	color: #fff;
+}
+
+#header a:hover {
+	color: #ccc;
+}
+h1 {
+	margin: 0 0 0 20px;
+	color: #fff;
+	background: url(radio.png) top left no-repeat;
+	padding-left: 35px;
+	display: block;
+	float: left;
+}
+
+#nav  {
+	margin: 7px 50px 0 0;
+	padding: 0;
+	float: right;
+}
+
+#wrapper {
+	margin: 20px;
+}
+
+#editor {
+	width: 75%;
+	float: left;
+}
+
+#chat {
+	width: 25%;
+	float: left;
+	position: absolute;
+	right: 10px;
+	bottom: 0;
+}
+
+#footer {
+	clear: both;
+}
+input#message {
+	width: 100% !important;
+}
+
+textarea {
+	padding: 10px;
+	width: 90%;
+	height: 500px;
+	font-family: monaco, monospace;
+}
+
+#messageform {
+	width: 100%;
+}
+
+#inbox {
+	overflow: auto;
+}
