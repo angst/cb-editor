@@ -23,6 +23,7 @@ import tornado.options
 import tornado.web
 import os.path
 import uuid
+import hashlib
 
 from tornado.options import define, options
 
@@ -35,8 +36,8 @@ class Application(tornado.web.Application):
             (r"/", MainHandler),
             (r"/auth/login", AuthLoginHandler),
             (r"/auth/logout", AuthLogoutHandler),
-            (r"/a/message/new", MessageNewHandler),
-            (r"/a/message/updates", MessageUpdatesHandler),
+            (r"/a/text/update", TextUpdateHandler),
+            (r"/a/text/listen", TextListenerHandler),
         ]
         settings = dict(
             cookie_secret="43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
@@ -58,70 +59,57 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        self.render("index.html", messages=MessageMixin.cache)
+        self.render("index.html", messages=[])
 
 
-class MessageMixin(object):
+class TextMixin(object):
     waiters = []
-    cache = []
-    cache_size = 200
+    text = { 'body': 'Hello World',
+             'sig': hashlib.sha1('Hello World').hexdigest() }
 
-    def wait_for_messages(self, callback, cursor=None):
-        cls = MessageMixin
-        if cursor:
-            index = 0
-            for i in xrange(len(cls.cache)):
-                index = len(cls.cache) - i - 1
-                if cls.cache[index]["id"] == cursor: break
-            recent = cls.cache[index + 1:]
-            if recent:
-                callback(recent)
-                return
-        cls.waiters.append(callback)
+    def wait_for_update(self, callback, sig=None):
+        cls = TextMixin
+        if sig != cls.text['sig']:
+            callback(cls.text)
+        else:
+            cls.waiters.append(callback)
 
-    def new_messages(self, messages):
-        cls = MessageMixin
-        logging.info("Sending new message to %r listeners", len(cls.waiters))
+    def update_text(self, body):
+        cls = TextMixin
+        cls.text['body'] = body
+        cls.text['sig'] = hashlib.sha1(body).hexdigest()
+        logging.info("Sending new Text to %r listeners", len(cls.waiters))
         for callback in cls.waiters:
             try:
-                callback(messages)
+                callback(cls.text)
             except:
                 logging.error("Error in waiter callback", exc_info=True)
         cls.waiters = []
-        cls.cache.extend(messages)
-        if len(cls.cache) > self.cache_size:
-            cls.cache = cls.cache[-self.cache_size:]
 
 
-class MessageNewHandler(BaseHandler, MessageMixin):
+class TextUpdateHandler(BaseHandler, TextMixin):
+    def get(self):
+        self.update_text(self.get_argument('body'))
+        self.write('ok')
+
     @tornado.web.authenticated
     def post(self):
-        message = {
-            "id": str(uuid.uuid4()),
-            "from": self.current_user["first_name"],
-            "body": self.get_argument("body"),
-        }
-        message["html"] = self.render_string("message.html", message=message)
-        if self.get_argument("next", None):
-            self.redirect(self.get_argument("next"))
-        else:
-            self.write(message)
-        self.new_messages([message])
+        self.update_text(self.get_argument('body'))
+        self.write('ok')
 
-
-class MessageUpdatesHandler(BaseHandler, MessageMixin):
+class TextListenerHandler(BaseHandler, TextMixin):
     @tornado.web.authenticated
     @tornado.web.asynchronous
     def post(self):
-        cursor = self.get_argument("cursor", None)
-        self.wait_for_messages(self.async_callback(self.on_new_messages),
-                               cursor=cursor)
+        sig = self.get_argument("sig", None)
+        self.wait_for_update(self.async_callback(self.on_update),
+                             sig=sig)
 
-    def on_new_messages(self, messages):
+    def on_update(self, body):
         # Closed client connection
         if self.request.connection.stream.closed():
             return
-        self.finish(dict(messages=messages))
+        self.finish(body)
 
 
 class AuthLoginHandler(BaseHandler, tornado.auth.GoogleMixin):
@@ -131,7 +119,7 @@ class AuthLoginHandler(BaseHandler, tornado.auth.GoogleMixin):
             self.get_authenticated_user(self.async_callback(self._on_auth))
             return
         self.authenticate_redirect(ax_attrs=["name"])
-    
+
     def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(500, "Google auth failed")
