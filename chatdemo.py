@@ -94,7 +94,7 @@ class TextUpdateHandler(BaseHandler, TextMixin):
 
     @tornado.web.authenticated
     def post(self):
-        self.update_text(self.get_argument('body'))
+        self.update_text(self.get_argument('body').encode('utf-8'))
         self.write('ok')
 
 class TextListenerHandler(BaseHandler, TextMixin):

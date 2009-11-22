@@ -61,7 +61,6 @@ var updater = {
   },
 
   onSuccess: function(response) {
-    console.log(response);
     try {
       updater.updateCode(eval("(" + response + ")"));
     } catch (e) {
@@ -79,8 +78,12 @@ var updater = {
   },
 
   updateCode: function(text) {
-    $('#codearea').text(text.body);
-    updater.sig = text.sig;
+    var ca = $("#codearea");
+    if (text.body != ca.val()) {
+      ca.text(text.body);
+    }
+
     updater.body = text.body;
+    updater.sig = text.sig;
   }
 };
