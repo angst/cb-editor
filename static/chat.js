@@ -27,16 +27,6 @@ function getCookie(name) {
   return r ? r[1] : undefined;
 }
 
-jQuery.postJSON = function(url, args, callback) {
-  args._xsrf = getCookie("_xsrf");
-  $.ajax({url: url, data: $.param(args), dataType: "text", type: "POST",
-    success: function(response) {
-      if (callback) callback(response);
-    }, error: function(response) {
-      console.log("ERROR:", response);
-    }});
-};
-
 var updater = {
   errorSleepTime: 500,
   sig: null,
@@ -62,13 +52,15 @@ var updater = {
 
   onSuccess: function(response) {
     try {
-      updater.updateCode(eval("(" + response + ")"));
+      if (response != 'ok') {
+        updater.updateCode(eval("(" + response + ")"));
+      }
     } catch (e) {
       updater.onError();
       return;
     }
     updater.errorSleepTime = 500;
-    window.setTimeout(updater.poll, 0);
+    window.setTimeout(updater.poll, 50);
   },
 
   onError: function(response) {

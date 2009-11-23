@@ -72,7 +72,7 @@ class TextMixin(object):
 
     def wait_for_update(self, callback, sig=None):
         cls = TextMixin
-        if sig != cls.text['sig']:
+        if sig != cls.text['sig'] and self.writer() != self.get_secure_cookie('uuid'):
             callback(cls.text)
         else:
             cls.waiters.append(callback)
@@ -130,7 +130,7 @@ class TextListenerHandler(BaseHandler, TextMixin):
         if self.writer() != self.get_secure_cookie('uuid'):
             self.finish(body)
         else:
-            self.finish()
+            self.finish('ok')
 
 
 class AuthLoginHandler(BaseHandler, tornado.auth.GoogleMixin):
