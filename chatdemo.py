@@ -24,6 +24,7 @@ import tornado.web
 import os.path
 import uuid
 import hashlib
+import time
 
 from tornado.options import define, options
 
@@ -66,6 +67,8 @@ class TextMixin(object):
     waiters = []
     text = { 'body': 'Hello World',
              'sig': hashlib.sha1('Hello World').hexdigest() }
+    writer_lock = None
+    lock_countdown = 5 # seconds
 
     def wait_for_update(self, callback, sig=None):
         cls = TextMixin
@@ -74,18 +77,32 @@ class TextMixin(object):
         else:
             cls.waiters.append(callback)
 
+    def acquire_lock(self, uuid):
+        cls = TextMixin
+        if self.writer() and self.writer() != uuid:
+            return False
+        cls.writer_lock = [uuid, time.time()]
+        return True
+
+    def writer(self):
+        cls = TextMixin
+        if cls.writer_lock and (time.time() - cls.writer_lock[1] < cls.lock_countdown):
+            return cls.writer_lock[0]
+
     def update_text(self, body):
         cls = TextMixin
-        cls.text['body'] = body
-        cls.text['sig'] = hashlib.sha1(body).hexdigest()
-        logging.info("Sending new Text to %r listeners", len(cls.waiters))
-        for callback in cls.waiters:
-            try:
-                callback(cls.text)
-            except:
-                logging.error("Error in waiter callback", exc_info=True)
-        cls.waiters = []
-
+        if self.acquire_lock(self.get_secure_cookie("uuid")):
+            cls.text['body'] = body
+            cls.text['sig'] = hashlib.sha1(body).hexdigest()
+            logging.info("Sending new Text to %r listeners", len(cls.waiters))
+            for callback in cls.waiters:
+                try:
+                    callback(cls.text)
+                except:
+                    logging.error("Error in waiter callback", exc_info=True)
+            cls.waiters = []
+        else:
+            logging.error("%s didn't have lock" % self.get_secure_cookie("uuid"))
 
 class TextUpdateHandler(BaseHandler, TextMixin):
     def get(self):
@@ -107,9 +124,13 @@ class TextListenerHandler(BaseHandler, TextMixin):
 
     def on_update(self, body):
         # Closed client connection
+        cls = TextMixin
         if self.request.connection.stream.closed():
             return
-        self.finish(body)
+        if self.writer() != self.get_secure_cookie('uuid'):
+            self.finish(body)
+        else:
+            self.finish()
 
 
 class AuthLoginHandler(BaseHandler, tornado.auth.GoogleMixin):
@@ -124,6 +145,7 @@ class AuthLoginHandler(BaseHandler, tornado.auth.GoogleMixin):
         if not user:
             raise tornado.web.HTTPError(500, "Google auth failed")
         self.set_secure_cookie("user", tornado.escape.json_encode(user))
+        self.set_secure_cookie("uuid", str(uuid.uuid4()))
         self.redirect("/")
 
 
