@@ -1,0 +1,127 @@
+/* @override http://dev.looce.com:8888/static/style.css?v=b5db4 */
+
+body {
+	background: #D8D8D7;
+  	margin:0;
+  	font-family: sans-serif;
+  	font-size: 10pt;
+  	color: black;
+}
+
+#header {
+	background: #000;
+	width: 100%;
+	padding-top: 10px;
+	height: 40px;
+}
+
+#header a {
+	color: #fff;
+}
+
+#header a:hover {
+	color: #ccc;
+}
+h1 {
+	margin: 0 0 0 20px;
+	color: #fff;
+	background: url(radio.png) top left no-repeat;
+	padding-left: 35px;
+	display: block;
+	float: left;
+}
+
+#nav  {
+	margin: 7px 50px 0 0;
+	padding: 0;
+	float: right;
+}
+
+#wrapper {
+	width: 900px;
+	margin: 20px;
+}
+
+#editor {
+	width: 700px;
+	float: left;
+	margin-bottom: 50px;
+}
+
+textarea {
+	padding: 10px;
+	width: 677px;
+	height: 500px;
+	font-family: monaco, monospace;
+	font-size: 12px;
+}
+
+
+
+#footer {
+	clear: both;
+	font-size: 10px;
+	
+}
+
+
+#sidebar {
+	float: left;
+	width: 200px;
+}
+
+.bar {
+	color: ;
+	background-color: #e8eaea;
+	border-bottom: 2px solid #c2c3c3;
+	border-right: 2px solid #c2c3c3;
+	font-family: monaco, monospace;
+	height: 25px;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+
+.filename {
+	text-shadow: rgba(214,255,236,0.64) 1px -1px 3px;
+	float: left;
+}
+
+.personCount {
+	display: block;
+	float: right;
+	width: 18px;
+	height: 25px;
+	background-color: rgba(129,206,255,0.5);
+	color: #fff;
+	margin-top: -10px;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+
+.clear {
+	width: 0;
+	height: 0;
+	clear: both;
+}
+
+ul {
+	list-style: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
